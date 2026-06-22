@@ -351,7 +351,7 @@
     <div class="proof-grid reveal">
       <div class="proof-card">
         <div class="proof-stat">100%</div>
-        <div class="proof-label">de producción de video automatizada en un flujo de contenido recurrente, sin intervención manual diaria.</div>
+        <div class="proof-label">de producción de contenido para redes automatizada en un flujo de contenido recurrente, sin intervención manual diaria.</div>
       </div>
       <div class="proof-card">
         <div class="proof-stat">16+</div>
@@ -374,18 +374,21 @@
         <div class="contact-channel"><b>Email</b>&nbsp;— contacto@contrachaos.net</div>
         <div class="contact-channel"><b>Respuesta</b>&nbsp;— en menos de 24 horas hábiles</div>
       </div>
-      <form onsubmit="event.preventDefault(); document.getElementById('formMsg').style.display='block';">
+      <form id="contactForm">
+        <input type="hidden" name="access_key" value="73c7b378-d5a3-476c-9cb5-faffe801a14d">
+        <input type="hidden" name="subject" value="Nuevo contacto desde contrachaos.net">
+        <input type="hidden" name="from_name" value="ContraChaos Solutions — Formulario web">
         <div class="field">
           <label>Nombre</label>
-          <input type="text" placeholder="Tu nombre" required>
+          <input type="text" name="name" placeholder="Tu nombre" required>
         </div>
         <div class="field">
           <label>Email</label>
-          <input type="email" placeholder="tu@empresa.com" required>
+          <input type="email" name="email" placeholder="tu@empresa.com" required>
         </div>
         <div class="field">
           <label>Servicio de interés</label>
-          <select>
+          <select name="servicio">
             <option>Automatización de workflows</option>
             <option>Desarrollo de apps</option>
             <option>Páginas web</option>
@@ -395,11 +398,12 @@
         </div>
         <div class="field">
           <label>Contanos tu caso</label>
-          <textarea placeholder="¿Qué proceso te está costando más tiempo o dinero hoy?"></textarea>
+          <textarea name="message" placeholder="¿Qué proceso te está costando más tiempo o dinero hoy?"></textarea>
         </div>
         <div class="submit-row">
-          <button class="btn-primary" type="submit">Enviar</button>
-          <span class="submit-note" id="formMsg" style="display:none;">Mensaje listo — conectá este formulario a tu email cuando publiques el sitio.</span>
+          <button class="btn-primary" type="submit" id="submitBtn">Enviar</button>
+          <span class="submit-note" id="formMsg" style="display:none;">Mensaje enviado — te responderemos pronto.</span>
+          <span class="submit-note" id="formErr" style="display:none; color:var(--warn);">Hubo un problema al enviar. Probá de nuevo o escribinos directo por email.</span>
         </div>
       </form>
     </div>
@@ -440,6 +444,41 @@
     entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
   }, {threshold:0.15});
   reveals.forEach(el=>io.observe(el));
+
+  // contact form -> Web3Forms
+  const contactForm = document.getElementById('contactForm');
+  if(contactForm){
+    contactForm.addEventListener('submit', async function(e){
+      e.preventDefault();
+      const btn = document.getElementById('submitBtn');
+      const msg = document.getElementById('formMsg');
+      const err = document.getElementById('formErr');
+      msg.style.display = 'none';
+      err.style.display = 'none';
+      btn.disabled = true;
+      btn.textContent = 'Enviando...';
+      try{
+        const formData = new FormData(contactForm);
+        const res = await fetch('https://api.web3forms.com/submit', {
+          method: 'POST',
+          headers: { 'Accept': 'application/json' },
+          body: formData
+        });
+        const result = await res.json();
+        if(result.success){
+          msg.style.display = 'inline';
+          contactForm.reset();
+        } else {
+          err.style.display = 'inline';
+        }
+      } catch(error){
+        err.style.display = 'inline';
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Enviar';
+      }
+    });
+  }
 </script>
 
 </body>
