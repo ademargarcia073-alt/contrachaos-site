@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ContraChaos Solutions — Automatización, desarrollo y forecasting</title>
+<style>
+  :root{
+    --ink:#18324A;
+    --ink-soft:#4F6478;
+    --ink-faint:#8C9AA8;
+    --paper:#E6E9EC;
+    --paper-raised:#FFFFFF;
+    --line:#CBD1D7;
+    --signal:#C9893F;
+    --signal-soft:#F3E5D1;
+    --signal-deep:#8A5A22;
+    --warn:#4F7C8C;
+    --mono:'IBM Plex Mono', 'SF Mono', Consolas, monospace;
+    --serif:'Newsreader', Georgia, serif;
+    --sans:'Inter', -apple-system, sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--sans);
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  ::selection{background:var(--signal-soft); color:var(--signal-deep);}
+
+  a{color:inherit; text-decoration:none;}
+  .wrap{max-width:1120px; margin:0 auto; padding:0 32px;}
+
+  /* ---- noise/grid backdrop ---- */
+  .grid-bg{
+    position:fixed; inset:0; z-index:0; pointer-events:none;
+    background-image:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size:64px 64px;
+    opacity:0.35;
+    mask-image: radial-gradient(ellipse 80% 50% at 50% 0%, black 40%, transparent 90%);
+  }
+
+  /* ---- nav ---- */
+  nav{
+    position:sticky; top:0; z-index:50;
+    background:rgba(230,233,236,0.86);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line);
+  }
+  nav .wrap{display:flex; align-items:center; justify-content:space-between; height:72px;}
+  .brand{display:flex; align-items:center; gap:10px; font-weight:600; font-size:15px; letter-spacing:-0.01em;}
+  .brand .mark{
+    width:26px; height:26px; border-radius:3px;
+    background:var(--ink);
+    position:relative; flex-shrink:0;
+  }
+  .brand .mark::before{
+    content:''; position:absolute; inset:6px;
+    background:var(--signal);
+    clip-path:polygon(0 100%, 0 40%, 50% 0, 100% 60%, 100% 100%);
+  }
+  .navlinks{display:flex; gap:36px; font-size:14px; color:var(--ink-soft);}
+  .navlinks a:hover{color:var(--ink);}
+  .nav-cta{
+    font-size:13.5px; font-weight:500; padding:9px 18px;
+    border:1px solid var(--ink); border-radius:2px;
+    transition:background .15s, color .15s;
+  }
+  .nav-cta:hover{background:var(--ink); color:var(--paper);}
+  @media (max-width:760px){ .navlinks{display:none;} }
+
+  /* ---- hero ---- */
+  header.hero{position:relative; z-index:1; padding:120px 0 90px;}
+  .eyebrow{
+    font-family:var(--mono); font-size:12.5px; letter-spacing:0.08em;
+    color:var(--signal-deep); text-transform:uppercase;
+    display:flex; align-items:center; gap:10px; margin-bottom:28px;
+  }
+  .eyebrow::before{
+    content:''; width:7px; height:7px; background:var(--signal); border-radius:50%;
+    box-shadow:0 0 0 4px var(--signal-soft);
+  }
+  h1.display{
+    font-family:var(--serif);
+    font-size:clamp(40px, 6vw, 68px);
+    font-weight:500;
+    line-height:1.05;
+    letter-spacing:-0.01em;
+    max-width:780px;
+    margin-bottom:26px;
+  }
+  h1.display em{font-style:italic; color:var(--signal-deep);}
+  .hero-sub{
+    font-size:18px; color:var(--ink-soft); max-width:520px; line-height:1.6;
+    margin-bottom:40px;
+  }
+  .hero-actions{display:flex; gap:14px; align-items:center; margin-bottom:64px;}
+  .btn-primary{
+    background:var(--ink); color:var(--paper); font-size:14.5px; font-weight:500;
+    padding:14px 26px; border-radius:2px; border:1px solid var(--ink);
+    cursor:pointer; transition:background .15s, transform .1s;
+    font-family:var(--sans);
+  }
+  .btn-primary:hover{background:var(--signal-deep); border-color:var(--signal-deep);}
+  .btn-primary:active{transform:scale(0.98);}
+  .btn-ghost{
+    font-size:14.5px; font-weight:500; padding:14px 22px; color:var(--ink);
+    border-bottom:1px solid var(--ink); cursor:pointer; background:none; border-top:none; border-left:none; border-right:none;
+    font-family:var(--sans);
+  }
+  .btn-ghost:hover{color:var(--signal-deep); border-color:var(--signal-deep);}
+
+  /* ---- hero diagram: chaos -> order ---- */
+  .flow-strip{
+    border-top:1px solid var(--line);
+    padding-top:36px;
+    display:flex; align-items:center; gap:28px; flex-wrap:wrap;
+  }
+  .flow-label{font-family:var(--mono); font-size:11.5px; color:var(--ink-faint); letter-spacing:0.04em; white-space:nowrap;}
+  svg.flowviz{flex:1; min-width:280px; max-width:560px; height:54px; display:block;}
+
+  /* ---- section shell ---- */
+  section{position:relative; z-index:1; padding:96px 0;}
+  .section-head{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:52px; gap:24px; flex-wrap:wrap;}
+  .section-tag{font-family:var(--mono); font-size:12px; color:var(--ink-faint); letter-spacing:0.06em; text-transform:uppercase;}
+  h2.section-title{font-family:var(--serif); font-size:clamp(28px,3.4vw,38px); font-weight:500; letter-spacing:-0.01em; max-width:520px;}
+  .section-note{font-size:14.5px; color:var(--ink-soft); max-width:300px; text-align:right; line-height:1.5;}
+  @media (max-width:700px){ .section-note{text-align:left;} }
+
+  /* ---- services ---- */
+  .services{border-top:1px solid var(--line); background:var(--paper-raised);}
+  .service-list{display:flex; flex-direction:column;}
+  .service-row{
+    display:grid; grid-template-columns:64px 1fr 1fr 100px;
+    gap:32px; align-items:start;
+    padding:34px 0; border-bottom:1px solid var(--line);
+    transition:background .2s;
+  }
+  .service-row:hover{background:var(--paper);}
+  .service-num{font-family:var(--mono); font-size:13px; color:var(--ink-faint); padding-top:4px;}
+  .service-name{font-size:21px; font-weight:600; letter-spacing:-0.01em;}
+  .service-name .sub{display:block; font-size:13.5px; font-weight:400; color:var(--signal-deep); font-family:var(--mono); margin-top:6px; letter-spacing:0;}
+  .service-desc{font-size:15px; color:var(--ink-soft); line-height:1.65; padding-top:2px;}
+  .service-arrow{
+    justify-self:end; align-self:center;
+    width:38px; height:38px; border:1px solid var(--line); border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-family:var(--mono); font-size:16px; color:var(--ink-soft);
+    cursor:pointer; transition:all .15s; background:none;
+  }
+  .service-arrow:hover{border-color:var(--signal); color:var(--signal-deep); background:var(--signal-soft);}
+  @media (max-width:760px){
+    .service-row{grid-template-columns:40px 1fr; row-gap:10px;}
+    .service-desc{grid-column:2; }
+    .service-arrow{grid-column:2; justify-self:start; margin-top:8px;}
+  }
+
+  /* ---- process ---- */
+  .process{background:var(--ink); color:var(--paper);}
+  .process .section-tag{color:#8C9AA8;}
+  .process h2.section-title{color:var(--paper);}
+  .process .section-note{color:#A3AEBA;}
+  .process-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:#24405A; border:1px solid #24405A;}
+  .pstep{background:var(--ink); padding:32px 26px; min-height:200px; display:flex; flex-direction:column; justify-content:space-between;}
+  .pstep .pnum{font-family:var(--serif); font-style:italic; font-size:32px; color:var(--signal); opacity:0.85;}
+  .pstep .ptitle{font-size:16px; font-weight:600; margin:18px 0 8px;}
+  .pstep .ptext{font-size:13.5px; color:#A3AEBA; line-height:1.55;}
+  @media (max-width:900px){ .process-grid{grid-template-columns:repeat(2,1fr);} }
+  @media (max-width:560px){ .process-grid{grid-template-columns:1fr;} }
+
+  /* ---- proof / metrics ---- */
+  .proof{border-top:1px solid var(--line);}
+  .proof-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:48px;}
+  .proof-card{padding-right:24px;}
+  .proof-stat{font-family:var(--serif); font-size:44px; font-weight:500; color:var(--signal-deep); line-height:1;}
+  .proof-label{font-size:14px; color:var(--ink-soft); margin-top:10px; line-height:1.5;}
+  @media (max-width:760px){ .proof-grid{grid-template-columns:1fr; gap:32px;} }
+
+  /* ---- contact ---- */
+  .contact{background:var(--paper-raised); border-top:1px solid var(--line);}
+  .contact-box{
+    border:1px solid var(--line); border-radius:4px; padding:64px;
+    display:grid; grid-template-columns:1.1fr 1fr; gap:56px;
+    background:
+      linear-gradient(var(--paper) 1px, transparent 1px),
+      linear-gradient(90deg, var(--paper) 1px, transparent 1px);
+  }
+  .contact-left h2{font-family:var(--serif); font-size:clamp(26px,3vw,34px); font-weight:500; margin-bottom:18px; max-width:380px;}
+  .contact-left p{color:var(--ink-soft); font-size:15px; line-height:1.65; max-width:380px; margin-bottom:28px;}
+  .contact-channel{display:flex; align-items:center; gap:10px; font-family:var(--mono); font-size:13.5px; color:var(--ink-soft); margin-bottom:10px;}
+  .contact-channel b{color:var(--ink); font-weight:500;}
+  form{display:flex; flex-direction:column; gap:14px;}
+  .field{display:flex; flex-direction:column; gap:6px;}
+  .field label{font-size:12.5px; color:var(--ink-soft); font-family:var(--mono);}
+  .field input, .field select, .field textarea{
+    border:1px solid var(--line); background:var(--paper); border-radius:2px;
+    padding:12px 14px; font-size:14.5px; font-family:var(--sans); color:var(--ink);
+    outline:none; transition:border-color .15s;
+  }
+  .field input:focus, .field select:focus, .field textarea:focus{border-color:var(--signal);}
+  .field textarea{resize:vertical; min-height:80px;}
+  .submit-row{display:flex; align-items:center; gap:16px; margin-top:6px;}
+  .submit-note{font-size:12.5px; color:var(--ink-faint);}
+  @media (max-width:820px){ .contact-box{grid-template-columns:1fr; padding:40px 28px;} }
+
+  /* ---- footer ---- */
+  footer{padding:40px 0; border-top:1px solid var(--line);}
+  footer .wrap{display:flex; justify-content:space-between; align-items:center; font-size:13px; color:var(--ink-faint); flex-wrap:wrap; gap:12px;}
+  footer .fmark{font-family:var(--mono);}
+
+  /* ---- reveal on scroll ---- */
+  .reveal{opacity:0; transform:translateY(14px); transition:opacity .6s ease, transform .6s ease;}
+  .reveal.in{opacity:1; transform:none;}
+  @media (prefers-reduced-motion: reduce){
+    .reveal{opacity:1; transform:none; transition:none;}
+    html{scroll-behavior:auto;}
+  }
+</style>
+</head>
+<body>
+
+<div class="grid-bg"></div>
+
+<nav>
+  <div class="wrap">
+    <div class="brand"><span class="mark"></span>ContraChaos Solutions</div>
+    <div class="navlinks">
+      <a href="#servicios">Servicios</a>
+      <a href="#proceso">Cómo trabajamos</a>
+      <a href="#resultados">Resultados</a>
+    </div>
+    <a href="#contacto" class="nav-cta">Agendar consulta</a>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="eyebrow">Sistemas, no parches</div>
+    <h1 class="display">El caos operativo tiene una <em>estructura</em> esperando a ser descubierta.</h1>
+    <p class="hero-sub">Diseñamos software, modelos de pronóstico y automatizaciones que convierten procesos dispersos en sistemas que se sostienen solos.</p>
+    <div class="hero-actions">
+      <button class="btn-primary" onclick="document.getElementById('contacto').scrollIntoView({behavior:'smooth'})">Agendar una consulta</button>
+      <button class="btn-ghost" onclick="document.getElementById('servicios').scrollIntoView({behavior:'smooth'})">Ver servicios</button>
+    </div>
+
+    <div class="flow-strip">
+      <span class="flow-label">entrada dispersa</span>
+      <svg class="flowviz" viewBox="0 0 560 54" preserveAspectRatio="none">
+        <g id="chaosDots"></g>
+        <path id="flowPath" d="M 0 27 C 140 27, 160 27, 280 27 S 420 27, 560 27" fill="none" stroke="#C9893F" stroke-width="1.4" stroke-dasharray="3 4" opacity="0.5"/>
+        <g id="orderDots"></g>
+      </svg>
+      <span class="flow-label">sistema ordenado</span>
+    </div>
+  </div>
+</header>
+
+<section id="servicios">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <div>
+        <div class="section-tag">Qué hacemos</div>
+        <h2 class="section-title">Cuatro formas de quitarle fricción a tu operación</h2>
+      </div>
+      <p class="section-note">Cada servicio resuelve un cuello de botella distinto. Empezamos por el que más te está costando ahora.</p>
+    </div>
+  </div>
+
+  <div class="services">
+    <div class="wrap">
+      <div class="service-list">
+
+        <div class="service-row reveal">
+          <div class="service-num">01</div>
+          <div class="service-name">Automatización de workflows<span class="sub">procesos sin supervisión manual</span></div>
+          <div class="service-desc">Mapeamos las tareas repetitivas de tu equipo —reportes, seguimientos, conciliaciones— y las convertimos en flujos automáticos que corren sin que nadie tenga que acordarse de hacerlos.</div>
+          <button class="service-arrow" onclick="sendPrompt('Quiero más detalles sobre el servicio de automatización de workflows de ContraChaos')">↗</button>
+        </div>
+
+        <div class="service-row reveal">
+          <div class="service-num">02</div>
+          <div class="service-name">Desarrollo de apps<span class="sub">software a medida de tu operación</span></div>
+          <div class="service-desc">Aplicaciones web y móviles diseñadas alrededor de cómo trabaja tu equipo realmente, no de un template genérico. De la idea al sistema en producción.</div>
+          <button class="service-arrow" onclick="sendPrompt('Quiero más detalles sobre el servicio de desarrollo de apps de ContraChaos')">↗</button>
+        </div>
+
+        <div class="service-row reveal">
+          <div class="service-num">03</div>
+          <div class="service-name">Páginas web<span class="sub">presencia digital que convierte</span></div>
+          <div class="service-desc">Sitios rápidos, claros y construidos para guiar a quien los visita hacia una acción concreta —no solo para verse bien.</div>
+          <button class="service-arrow" onclick="sendPrompt('Quiero más detalles sobre el servicio de páginas web de ContraChaos')">↗</button>
+        </div>
+
+        <div class="service-row reveal">
+          <div class="service-num">04</div>
+          <div class="service-name">Forecasting<span class="sub">decisiones con datos, no con corazonadas</span></div>
+          <div class="service-desc">Modelos de pronóstico de demanda, ventas o riesgo construidos sobre tus propios datos históricos, con base estadística sólida y resultados interpretables.</div>
+          <button class="service-arrow" onclick="sendPrompt('Quiero más detalles sobre el servicio de forecasting de ContraChaos')">↗</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="proceso" class="process">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <div>
+        <div class="section-tag">Cómo trabajamos</div>
+        <h2 class="section-title">Un proceso pensado para que nada se pierda en el camino</h2>
+      </div>
+      <p class="section-note">Cuatro etapas, sin saltos. Cada una termina en un entregable concreto, no en una promesa.</p>
+    </div>
+
+    <div class="process-grid reveal">
+      <div class="pstep">
+        <div class="pnum">01</div>
+        <div><div class="ptitle">Diagnóstico</div><div class="ptext">Entendemos el proceso real, no el que está documentado. Identificamos dónde se pierde tiempo y dónde se pierde dinero.</div></div>
+      </div>
+      <div class="pstep">
+        <div class="pnum">02</div>
+        <div><div class="ptitle">Diseño del sistema</div><div class="ptext">Definimos la arquitectura técnica más simple que resuelve el problema —sin sobreingeniería.</div></div>
+      </div>
+      <div class="pstep">
+        <div class="pnum">03</div>
+        <div><div class="ptitle">Construcción</div><div class="ptext">Desarrollo iterativo con entregas parciales. Ves avances reales cada semana, no al final del proyecto.</div></div>
+      </div>
+      <div class="pstep">
+        <div class="pnum">04</div>
+        <div><div class="ptitle">Estabilización</div><div class="ptext">Acompañamiento posterior al lanzamiento para ajustar el sistema a cómo realmente se usa en el día a día.</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="resultados" class="proof">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <div>
+        <div class="section-tag">Resultados</div>
+        <h2 class="section-title">Sistemas que ya están corriendo</h2>
+      </div>
+    </div>
+
+    <div class="proof-grid reveal">
+      <div class="proof-card">
+        <div class="proof-stat">100%</div>
+        <div class="proof-label">de producción de video automatizada en un flujo de contenido recurrente, sin intervención manual diaria.</div>
+      </div>
+      <div class="proof-card">
+        <div class="proof-stat">16+</div>
+        <div class="proof-label">usuarios gestionando asistencia y pagos mensuales desde un solo sistema, reemplazando planillas dispersas.</div>
+      </div>
+      <div class="proof-card">
+        <div class="proof-stat">80</div>
+        <div class="proof-label">eventos proyectados simultáneamente en un modelo de pronóstico con distribución estadística por resultado.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="contacto">
+  <div class="wrap">
+    <div class="contact-box reveal">
+      <div class="contact-left">
+        <h2>Empecemos por el proceso que más te está costando.</h2>
+        <p>Una llamada de 5 minutos para entender tu caso y decirte, con honestidad, si podemos ayudarte y cómo.</p>
+        <div class="contact-channel"><b>Email</b>&nbsp;— contacto@contrachaos.net</div>
+        <div class="contact-channel"><b>Respuesta</b>&nbsp;— en menos de 24 horas hábiles</div>
+      </div>
+      <form onsubmit="event.preventDefault(); document.getElementById('formMsg').style.display='block';">
+        <div class="field">
+          <label>Nombre</label>
+          <input type="text" placeholder="Tu nombre" required>
+        </div>
+        <div class="field">
+          <label>Email</label>
+          <input type="email" placeholder="tu@empresa.com" required>
+        </div>
+        <div class="field">
+          <label>Servicio de interés</label>
+          <select>
+            <option>Automatización de workflows</option>
+            <option>Desarrollo de apps</option>
+            <option>Páginas web</option>
+            <option>Forecasting</option>
+            <option>No estoy seguro todavía</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Contanos tu caso</label>
+          <textarea placeholder="¿Qué proceso te está costando más tiempo o dinero hoy?"></textarea>
+        </div>
+        <div class="submit-row">
+          <button class="btn-primary" type="submit">Enviar</button>
+          <span class="submit-note" id="formMsg" style="display:none;">Mensaje listo — conectá este formulario a tu email cuando publiques el sitio.</span>
+        </div>
+      </form>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span class="fmark">ContraChaos Solutions © 2026</span>
+    <span class="fmark">La Paz, Bolivia — trabajo remoto disponible</span>
+  </div>
+</footer>
+
+<script>
+  // chaos -> order dot visualization on the flow strip
+  (function(){
+    const chaos = document.getElementById('chaosDots');
+    const order = document.getElementById('orderDots');
+    const chaosPositions = [[14,12],[26,38],[10,30],[34,18],[20,8],[30,44]];
+    const orderPositions = [[526,27],[538,27],[514,27],[550,27],[502,27],[546,27]];
+    chaosPositions.forEach(([x,y])=>{
+      const c = document.createElementNS('http://www.w3.org/2000/svg','circle');
+      c.setAttribute('cx',x); c.setAttribute('cy',y); c.setAttribute('r',2.6);
+      c.setAttribute('fill','#4F7C8C'); c.setAttribute('opacity','0.75');
+      chaos.appendChild(c);
+    });
+    orderPositions.forEach(([x,y])=>{
+      const c = document.createElementNS('http://www.w3.org/2000/svg','circle');
+      c.setAttribute('cx',x); c.setAttribute('cy',y); c.setAttribute('r',2.6);
+      c.setAttribute('fill','#C9893F');
+      order.appendChild(c);
+    });
+  })();
+
+  // scroll reveal
+  const reveals = document.querySelectorAll('.reveal');
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
+  }, {threshold:0.15});
+  reveals.forEach(el=>io.observe(el));
+</script>
+
+</body>
+</html>
