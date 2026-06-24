@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contacto — ContraChaos Solutions</title>
+  <meta name="description" content="Cuéntanos qué quieres arreglar. Respondemos en menos de 24 horas hábiles.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=DM+Serif+Display:ital,wght@0,400;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+<div class="site-wrap">
+
+  <!-- NAV -->
+  <nav class="nav">
+    <div class="container nav-inner">
+      <a href="/" class="logo">
+        <span class="logo-name">ContraChaos</span>
+        <span class="logo-tag">Solutions</span>
+      </a>
+      <div class="nav-links">
+        <a href="/" class="nav-item">Inicio</a>
+        <a href="/servicios/" class="nav-item">Servicios</a>
+        <a href="/contacto/" class="btn btn-dark nav-cta">Contacto</a>
+      </div>
+    </div>
+  </nav>
+
+  <main>
+    <div class="page">
+      <section style="max-width:1120px;margin:0 auto;padding:84px 32px 88px;">
+
+        <div data-reveal class="section-tag">Contacto</div>
+        <h1 data-reveal style="font-size:clamp(40px,6vw,68px);line-height:1.0;margin:0 0 18px;max-width:620px;">Cuéntanos qué quieres arreglar</h1>
+        <p data-reveal style="font-size:17px;line-height:1.6;color:#5b5346;max-width:500px;margin:0 0 56px;">Respondemos en menos de 24 horas hábiles. Sin formularios eternos: lo justo para entender tu caso y seguir la conversación.</p>
+
+        <div class="contact-grid">
+
+          <!-- CANALES DIRECTOS -->
+          <div data-reveal class="contact-channels">
+            <a href="https://wa.me/59168050981" class="channel-card channel-card-dark scard">
+              <span class="channel-label">WhatsApp</span>
+              <span class="channel-value">+591 68050981</span>
+              <span class="channel-meta-dark">Respuesta rápida en horario hábil</span>
+            </a>
+            <a href="mailto:contacto@contrachaos.net" class="channel-card channel-card-light scard">
+              <span class="channel-label">Email</span>
+              <span class="channel-value">contacto@contrachaos.net</span>
+              <span class="channel-meta-light">Para propuestas y detalles</span>
+            </a>
+            <div class="contact-location">
+              <span style="font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#8a8273;">Ubicación</span><br>
+              Bolivia · trabajamos en remoto con toda LATAM
+            </div>
+          </div>
+
+          <!-- FORMULARIO -->
+          <div data-reveal class="contact-form-box">
+            <form id="contact-form">
+              <!-- IMPORTANTE: reemplaza NUEVO_ACCESS_KEY_CONTACTO con tu segundo access key de Web3Forms -->
+              <input type="hidden" name="access_key" value="73c7b378-d5a3-476c-9cb5-faffe801a14d">
+              <input type="hidden" name="subject" value="Nuevo contacto desde contrachaos.net">
+              <input type="hidden" name="from_name" value="ContraChaos — Formulario de contacto">
+              <input type="hidden" id="selected-service" name="servicio_interes" value="">
+
+              <div style="margin-bottom:24px;">
+                <label class="form-label-mono">¿Qué necesitas?</label>
+                <div class="pills">
+                  <button type="button" class="pill" data-svc="Automatización de workflows">Automatización</button>
+                  <button type="button" class="pill" data-svc="Desarrollo de apps">Apps</button>
+                  <button type="button" class="pill" data-svc="Páginas web">Web</button>
+                  <button type="button" class="pill" data-svc="Forecasting">Forecasting</button>
+                </div>
+              </div>
+
+              <div class="form-grid-2" style="margin-bottom:16px;">
+                <div>
+                  <label class="form-label">Nombre</label>
+                  <input class="form-input" type="text" name="nombre" placeholder="Tu nombre" required>
+                </div>
+                <div>
+                  <label class="form-label">Empresa <span class="form-optional">(opcional)</span></label>
+                  <input class="form-input" type="text" name="empresa" placeholder="Nombre de la empresa">
+                </div>
+              </div>
+
+              <div class="form-grid-2" style="margin-bottom:16px;">
+                <div>
+                  <label class="form-label">Email</label>
+                  <input class="form-input" type="email" name="email" placeholder="tu@correo.com" required>
+                </div>
+                <div>
+                  <label class="form-label">WhatsApp</label>
+                  <input class="form-input" type="text" name="whatsapp" placeholder="+591 ...">
+                </div>
+              </div>
+
+              <div style="margin-bottom:24px;">
+                <label class="form-label">Cuéntanos brevemente</label>
+                <textarea class="form-textarea" name="mensaje" rows="4" placeholder="¿Qué proceso o problema quieres resolver?"></textarea>
+              </div>
+
+              <div class="form-row">
+                <button type="submit" class="btn btn-dark submit-btn" style="padding:16px 34px;font-size:15px;font-weight:600;">Enviar mensaje →</button>
+                <span class="form-note">Respuesta &lt; 24 h hábiles</span>
+              </div>
+            </form>
+          </div>
+
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-grid">
+        <div>
+          <div class="logo footer-logo">
+            <span class="logo-name">ContraChaos</span>
+            <span class="logo-tag">Solutions</span>
+          </div>
+          <p class="footer-desc">Del caos operativo a sistemas que trabajan solos. Consultoría tecnológica desde Bolivia para toda LATAM.</p>
+        </div>
+        <div>
+          <div class="footer-col-head">Navegación</div>
+          <div class="footer-nav">
+            <a href="/" class="footer-link">Inicio</a>
+            <a href="/servicios/" class="footer-link">Servicios</a>
+            <a href="/contacto/" class="footer-link">Contacto</a>
+          </div>
+        </div>
+        <div>
+          <div class="footer-col-head">Contacto</div>
+          <div class="footer-nav">
+            <a href="https://wa.me/59168050981" class="footer-link">WhatsApp · +591 68050981</a>
+            <a href="mailto:contacto@contrachaos.net" class="footer-link">contacto@contrachaos.net</a>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2026 ContraChaos Solutions</span>
+        <span>contrachaos.net</span>
+      </div>
+    </div>
+  </footer>
+
+</div>
+<script src="/js/main.js"></script>
+</body>
+</html>

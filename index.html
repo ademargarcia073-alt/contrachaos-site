@@ -1,477 +1,178 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ContraChaos Solutions — Automatización, desarrollo y forecasting</title>
-<style>
-  :root{
-    --ink:#18324A;
-    --ink-soft:#4F6478;
-    --ink-faint:#8C9AA8;
-    --paper:#E6E9EC;
-    --paper-raised:#FFFFFF;
-    --line:#CBD1D7;
-    --signal:#C9893F;
-    --signal-soft:#F3E5D1;
-    --signal-deep:#8A5A22;
-    --warn:#4F7C8C;
-    --mono:'IBM Plex Mono', 'SF Mono', Consolas, monospace;
-    --serif:'Newsreader', Georgia, serif;
-    --sans:'Inter', -apple-system, sans-serif;
-  }
-  *{margin:0;padding:0;box-sizing:border-box;}
-  html{scroll-behavior:smooth;}
-  body{
-    background:var(--paper);
-    color:var(--ink);
-    font-family:var(--sans);
-    -webkit-font-smoothing:antialiased;
-    overflow-x:hidden;
-  }
-  ::selection{background:var(--signal-soft); color:var(--signal-deep);}
-
-  a{color:inherit; text-decoration:none;}
-  .wrap{max-width:1120px; margin:0 auto; padding:0 32px;}
-
-  /* ---- noise/grid backdrop ---- */
-  .grid-bg{
-    position:fixed; inset:0; z-index:0; pointer-events:none;
-    background-image:
-      linear-gradient(var(--line) 1px, transparent 1px),
-      linear-gradient(90deg, var(--line) 1px, transparent 1px);
-    background-size:64px 64px;
-    opacity:0.35;
-    mask-image: radial-gradient(ellipse 80% 50% at 50% 0%, black 40%, transparent 90%);
-  }
-
-  /* ---- nav ---- */
-  nav{
-    position:sticky; top:0; z-index:50;
-    background:rgba(230,233,236,0.86);
-    backdrop-filter:blur(10px);
-    border-bottom:1px solid var(--line);
-  }
-  nav .wrap{display:flex; align-items:center; justify-content:space-between; height:72px;}
-  .brand{display:flex; align-items:center; gap:10px; font-weight:600; font-size:15px; letter-spacing:-0.01em;}
-  .brand .mark{height:28px; width:auto; display:block; flex-shrink:0;}
-  .navlinks{display:flex; gap:36px; font-size:14px; color:var(--ink-soft);}
-  .navlinks a:hover{color:var(--ink);}
-  .nav-cta{
-    font-size:13.5px; font-weight:500; padding:9px 18px;
-    border:1px solid var(--ink); border-radius:2px;
-    transition:background .15s, color .15s;
-  }
-  .nav-cta:hover{background:var(--ink); color:var(--paper);}
-  @media (max-width:760px){ .navlinks{display:none;} }
-
-  /* ---- hero ---- */
-  header.hero{position:relative; z-index:1; padding:120px 0 90px;}
-  .eyebrow{
-    font-family:var(--mono); font-size:12.5px; letter-spacing:0.08em;
-    color:var(--signal-deep); text-transform:uppercase;
-    display:flex; align-items:center; gap:10px; margin-bottom:28px;
-  }
-  .eyebrow::before{
-    content:''; width:7px; height:7px; background:var(--signal); border-radius:50%;
-    box-shadow:0 0 0 4px var(--signal-soft);
-  }
-  h1.display{
-    font-family:var(--serif);
-    font-size:clamp(40px, 6vw, 68px);
-    font-weight:500;
-    line-height:1.05;
-    letter-spacing:-0.01em;
-    max-width:780px;
-    margin-bottom:26px;
-  }
-  h1.display em{font-style:italic; color:var(--signal-deep);}
-  .hero-sub{
-    font-size:18px; color:var(--ink-soft); max-width:520px; line-height:1.6;
-    margin-bottom:40px;
-  }
-  .hero-actions{display:flex; gap:14px; align-items:center; margin-bottom:64px;}
-  .btn-primary{
-    background:var(--ink); color:var(--paper); font-size:14.5px; font-weight:500;
-    padding:14px 26px; border-radius:2px; border:1px solid var(--ink);
-    cursor:pointer; transition:background .15s, transform .1s;
-    font-family:var(--sans);
-  }
-  .btn-primary:hover{background:var(--signal-deep); border-color:var(--signal-deep);}
-  .btn-primary:active{transform:scale(0.98);}
-  .btn-ghost{
-    font-size:14.5px; font-weight:500; padding:14px 22px; color:var(--ink);
-    border-bottom:1px solid var(--ink); cursor:pointer; background:none; border-top:none; border-left:none; border-right:none;
-    font-family:var(--sans);
-  }
-  .btn-ghost:hover{color:var(--signal-deep); border-color:var(--signal-deep);}
-
-  /* ---- hero diagram: chaos -> order ---- */
-  .flow-strip{
-    border-top:1px solid var(--line);
-    padding-top:36px;
-    display:flex; align-items:center; gap:28px; flex-wrap:wrap;
-  }
-  .flow-label{font-family:var(--mono); font-size:11.5px; color:var(--ink-faint); letter-spacing:0.04em; white-space:nowrap;}
-  svg.flowviz{flex:1; min-width:280px; max-width:560px; height:54px; display:block;}
-
-  /* ---- section shell ---- */
-  section{position:relative; z-index:1; padding:96px 0;}
-  .section-head{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:52px; gap:24px; flex-wrap:wrap;}
-  .section-tag{font-family:var(--mono); font-size:12px; color:var(--ink-faint); letter-spacing:0.06em; text-transform:uppercase;}
-  h2.section-title{font-family:var(--serif); font-size:clamp(28px,3.4vw,38px); font-weight:500; letter-spacing:-0.01em; max-width:520px;}
-  .section-note{font-size:14.5px; color:var(--ink-soft); max-width:300px; text-align:right; line-height:1.5;}
-  @media (max-width:700px){ .section-note{text-align:left;} }
-
-  /* ---- services ---- */
-  .services{border-top:1px solid var(--line); background:var(--paper-raised);}
-  .service-list{display:flex; flex-direction:column;}
-  .service-row{
-    display:grid; grid-template-columns:64px 1fr 1fr 100px;
-    gap:32px; align-items:start;
-    padding:34px 0; border-bottom:1px solid var(--line);
-    transition:background .2s;
-  }
-  .service-row:hover{background:var(--paper);}
-  .service-num{font-family:var(--mono); font-size:13px; color:var(--ink-faint); padding-top:4px;}
-  .service-name{font-size:21px; font-weight:600; letter-spacing:-0.01em;}
-  .service-name .sub{display:block; font-size:13.5px; font-weight:400; color:var(--signal-deep); font-family:var(--mono); margin-top:6px; letter-spacing:0;}
-  .service-desc{font-size:15px; color:var(--ink-soft); line-height:1.65; padding-top:2px;}
-  .service-arrow{
-    justify-self:end; align-self:center;
-    width:38px; height:38px; border:1px solid var(--line); border-radius:50%;
-    display:flex; align-items:center; justify-content:center;
-    font-family:var(--mono); font-size:16px; color:var(--ink-soft);
-    cursor:pointer; transition:all .15s; background:none;
-  }
-  .service-arrow:hover{border-color:var(--signal); color:var(--signal-deep); background:var(--signal-soft);}
-  @media (max-width:760px){
-    .service-row{grid-template-columns:40px 1fr; row-gap:10px;}
-    .service-desc{grid-column:2; }
-    .service-arrow{grid-column:2; justify-self:start; margin-top:8px;}
-  }
-
-  /* ---- process ---- */
-  .process{background:var(--ink); color:var(--paper);}
-  .process .section-tag{color:#8C9AA8;}
-  .process h2.section-title{color:var(--paper);}
-  .process .section-note{color:#A3AEBA;}
-  .process-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:#24405A; border:1px solid #24405A;}
-  .pstep{background:var(--ink); padding:32px 26px; min-height:200px; display:flex; flex-direction:column; justify-content:space-between;}
-  .pstep .pnum{font-family:var(--serif); font-style:italic; font-size:32px; color:var(--signal); opacity:0.85;}
-  .pstep .ptitle{font-size:16px; font-weight:600; margin:18px 0 8px;}
-  .pstep .ptext{font-size:13.5px; color:#A3AEBA; line-height:1.55;}
-  @media (max-width:900px){ .process-grid{grid-template-columns:repeat(2,1fr);} }
-  @media (max-width:560px){ .process-grid{grid-template-columns:1fr;} }
-
-  /* ---- proof / metrics ---- */
-  .proof{border-top:1px solid var(--line);}
-  .proof-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:48px;}
-  .proof-card{padding-right:24px;}
-  .proof-stat{font-family:var(--serif); font-size:44px; font-weight:500; color:var(--signal-deep); line-height:1;}
-  .proof-label{font-size:14px; color:var(--ink-soft); margin-top:10px; line-height:1.5;}
-  @media (max-width:760px){ .proof-grid{grid-template-columns:1fr; gap:32px;} }
-
-  /* ---- contact ---- */
-  .contact{background:var(--paper-raised); border-top:1px solid var(--line);}
-  .contact-box{
-    border:1px solid var(--line); border-radius:4px; padding:64px;
-    display:grid; grid-template-columns:1.1fr 1fr; gap:56px;
-    background:
-      linear-gradient(var(--paper) 1px, transparent 1px),
-      linear-gradient(90deg, var(--paper) 1px, transparent 1px);
-  }
-  .contact-left h2{font-family:var(--serif); font-size:clamp(26px,3vw,34px); font-weight:500; margin-bottom:18px; max-width:380px;}
-  .contact-left p{color:var(--ink-soft); font-size:15px; line-height:1.65; max-width:380px; margin-bottom:28px;}
-  .contact-channel{display:flex; align-items:center; gap:10px; font-family:var(--mono); font-size:13.5px; color:var(--ink-soft); margin-bottom:10px;}
-  .contact-channel b{color:var(--ink); font-weight:500;}
-  form{display:flex; flex-direction:column; gap:14px;}
-  .field{display:flex; flex-direction:column; gap:6px;}
-  .field label{font-size:12.5px; color:var(--ink-soft); font-family:var(--mono);}
-  .field input, .field select, .field textarea{
-    border:1px solid var(--line); background:var(--paper); border-radius:2px;
-    padding:12px 14px; font-size:14.5px; font-family:var(--sans); color:var(--ink);
-    outline:none; transition:border-color .15s;
-  }
-  .field input:focus, .field select:focus, .field textarea:focus{border-color:var(--signal);}
-  .field textarea{resize:vertical; min-height:80px;}
-  .submit-row{display:flex; align-items:center; gap:16px; margin-top:6px;}
-  .submit-note{font-size:12.5px; color:var(--ink-faint);}
-  @media (max-width:820px){ .contact-box{grid-template-columns:1fr; padding:40px 28px;} }
-
-  /* ---- footer ---- */
-  footer{padding:40px 0; border-top:1px solid var(--line);}
-  footer .wrap{display:flex; justify-content:space-between; align-items:center; font-size:13px; color:var(--ink-faint); flex-wrap:wrap; gap:12px;}
-  footer .fmark{font-family:var(--mono);}
-
-  /* ---- reveal on scroll ---- */
-  .reveal{opacity:0; transform:translateY(14px); transition:opacity .6s ease, transform .6s ease;}
-  .reveal.in{opacity:1; transform:none;}
-  @media (prefers-reduced-motion: reduce){
-    .reveal{opacity:1; transform:none; transition:none;}
-    html{scroll-behavior:auto;}
-  }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ContraChaos Solutions — Automatización, desarrollo y forecasting</title>
+  <meta name="description" content="Consultoría tecnológica desde Bolivia. Automatización de workflows, apps a medida, páginas web y forecasting para operaciones que necesitan crecer.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=DM+Serif+Display:ital,wght@0,400;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
+<div class="site-wrap">
 
-<div class="grid-bg"></div>
-
-<nav>
-  <div class="wrap">
-    <div class="brand"><img class="mark" src="data:image/png;base64,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" alt="ContraChaos">ContraChaos Solutions</div>
-    <div class="navlinks">
-      <a href="#servicios">Servicios</a>
-      <a href="#proceso">Cómo trabajamos</a>
-      <a href="#resultados">Resultados</a>
-    </div>
-    <a href="#contacto" class="nav-cta">Agendar consulta</a>
-  </div>
-</nav>
-
-<header class="hero">
-  <div class="wrap">
-    <div class="eyebrow">Sistemas, no parches</div>
-    <h1 class="display">El caos operativo tiene una <em>estructura</em> esperando a ser descubierta.</h1>
-    <p class="hero-sub">Diseñamos software, modelos de pronóstico y automatizaciones que convierten procesos dispersos en sistemas que se sostienen solos.</p>
-    <div class="hero-actions">
-      <button class="btn-primary" onclick="document.getElementById('contacto').scrollIntoView({behavior:'smooth'})">Agendar una consulta</button>
-      <button class="btn-ghost" onclick="document.getElementById('servicios').scrollIntoView({behavior:'smooth'})">Ver servicios</button>
-    </div>
-
-    <div class="flow-strip">
-      <span class="flow-label">entrada dispersa</span>
-      <svg class="flowviz" viewBox="0 0 560 54" preserveAspectRatio="none">
-        <g id="chaosDots"></g>
-        <path id="flowPath" d="M 0 27 C 140 27, 160 27, 280 27 S 420 27, 560 27" fill="none" stroke="#C9893F" stroke-width="1.4" stroke-dasharray="3 4" opacity="0.5"/>
-        <g id="orderDots"></g>
-      </svg>
-      <span class="flow-label">sistema ordenado</span>
-    </div>
-  </div>
-</header>
-
-<section id="servicios">
-  <div class="wrap">
-    <div class="section-head reveal">
-      <div>
-        <div class="section-tag">Qué hacemos</div>
-        <h2 class="section-title">Cuatro formas de quitarle fricción a tu operación</h2>
+  <!-- NAV -->
+  <nav class="nav">
+    <div class="container nav-inner">
+      <a href="/" class="logo">
+        <span class="logo-name">ContraChaos</span>
+        <span class="logo-tag">Solutions</span>
+      </a>
+      <div class="nav-links">
+        <a href="/" class="nav-item">Inicio</a>
+        <a href="/servicios/" class="nav-item">Servicios</a>
+        <a href="/contacto/" class="btn btn-dark nav-cta">Contacto</a>
       </div>
-      <p class="section-note">Cada servicio resuelve un cuello de botella distinto. Empezamos por el que más te está costando ahora.</p>
     </div>
-  </div>
+  </nav>
 
-  <div class="services">
-    <div class="wrap">
-      <div class="service-list">
+  <main>
+    <div class="page">
 
-        <div class="service-row reveal">
-          <div class="service-num">01</div>
-          <div class="service-name">Automatización de workflows<span class="sub">procesos sin supervisión manual</span></div>
-          <div class="service-desc">Mapeamos las tareas repetitivas de tu equipo —reportes, seguimientos, conciliaciones— y las convertimos en flujos automáticos que corren sin que nadie tenga que acordarse de hacerlos.</div>
-          <button class="service-arrow" onclick="sendPrompt('Quiero más detalles sobre el servicio de automatización de workflows de ContraChaos')">↗</button>
+      <!-- HERO -->
+      <section class="hero-dark">
+        <div class="hero-grid-bg"></div>
+        <div class="container" style="position:relative;padding-top:96px;padding-bottom:104px;">
+          <div data-reveal class="section-tag" style="margin-bottom:26px;">Consultoría tecnológica · Bolivia</div>
+          <h1 data-reveal style="font-size:clamp(44px,7vw,86px);line-height:.98;margin:0 0 28px;max-width:880px;">Orden para operaciones que necesitan crecer</h1>
+          <p data-reveal style="font-size:clamp(16px,2vw,20px);line-height:1.6;color:#c5bca7;max-width:560px;margin:0 0 40px;">Automatización, software a medida, web y forecasting. Construimos los sistemas que tu equipo sostiene a mano — para que corran mediante IA.</p>
+          <div data-reveal style="display:flex;gap:16px;flex-wrap:wrap;align-items:center;">
+            <a href="/contacto/" class="btn btn-amber">Conversemos →</a>
+            <a href="/servicios/" class="btn btn-outline">Ver servicios</a>
+          </div>
         </div>
+      </section>
 
-        <div class="service-row reveal">
-          <div class="service-num">02</div>
-          <div class="service-name">Desarrollo de apps<span class="sub">software a medida de tu operación</span></div>
-          <div class="service-desc">Aplicaciones web y móviles diseñadas alrededor de cómo trabaja tu equipo realmente, no de un template genérico. De la idea al sistema en producción.</div>
-          <button class="service-arrow" onclick="sendPrompt('Quiero más detalles sobre el servicio de desarrollo de apps de ContraChaos')">↗</button>
+      <!-- SERVICIOS PREVIEW -->
+      <section style="max-width:1120px;margin:0 auto;padding:84px 32px 40px;">
+        <div data-reveal style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:18px;margin-bottom:44px;">
+          <div>
+            <div class="section-tag">Lo que hacemos</div>
+            <h2 style="font-size:clamp(32px,4.5vw,48px);line-height:1.02;max-width:520px;">Cuatro maneras de poner orden</h2>
+          </div>
+          <a href="/servicios/" class="arrow-link" style="color:#1C2A20;font-size:14.5px;">Ver todos los servicios →</a>
         </div>
+        <div class="services-grid">
 
-        <div class="service-row reveal">
-          <div class="service-num">03</div>
-          <div class="service-name">Páginas web<span class="sub">presencia digital que convierte</span></div>
-          <div class="service-desc">Sitios rápidos, claros y construidos para guiar a quien los visita hacia una acción concreta —no solo para verse bien.</div>
-          <button class="service-arrow" onclick="sendPrompt('Quiero más detalles sobre el servicio de páginas web de ContraChaos')">↗</button>
+          <a href="/servicios/automatizacion.html" data-reveal class="scard" style="text-decoration:none;color:inherit;background:#1C2A20;border:1px solid #1C2A20;padding:30px 28px;display:flex;flex-direction:column;gap:14px;min-height:218px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <span style="font-family:'Space Mono',monospace;font-size:12px;color:#C07A3E;">01</span>
+              <span style="font-family:'Space Mono',monospace;font-size:12px;color:#8a978a;">desde $450</span>
+            </div>
+            <h3 style="font-family:'DM Serif Display',serif;font-size:27px;line-height:1.05;margin:0;font-weight:400;color:#EDE3D0;">Automatización de workflows</h3>
+            <p style="font-size:14px;line-height:1.55;margin:0;color:#b5ac98;">Reportes, seguimientos y conciliaciones convertidos en flujos que corren solos.</p>
+            <span class="arrow-link" style="margin-top:auto;font-size:13.5px;color:#C07A3E;">Ver detalle →</span>
+          </a>
+
+          <a href="/servicios/apps.html" data-reveal class="scard" style="text-decoration:none;color:inherit;background:#fff;border:1px solid rgba(31,27,22,.14);padding:30px 28px;display:flex;flex-direction:column;gap:14px;min-height:218px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <span style="font-family:'Space Mono',monospace;font-size:12px;color:#C07A3E;">02</span>
+              <span style="font-family:'Space Mono',monospace;font-size:12px;color:#90876f;">desde $1.200</span>
+            </div>
+            <h3 style="font-family:'DM Serif Display',serif;font-size:27px;line-height:1.05;margin:0;font-weight:400;color:#1F1B16;">Desarrollo de apps</h3>
+            <p style="font-size:14px;line-height:1.55;margin:0;color:#5b5346;">Software web y móvil a medida de cómo trabaja tu equipo, no de un template.</p>
+            <span class="arrow-link" style="margin-top:auto;font-size:13.5px;color:#C07A3E;">Ver detalle →</span>
+          </a>
+
+          <a href="/servicios/web.html" data-reveal class="scard" style="text-decoration:none;color:inherit;background:#fff;border:1px solid rgba(31,27,22,.14);padding:30px 28px;display:flex;flex-direction:column;gap:14px;min-height:218px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <span style="font-family:'Space Mono',monospace;font-size:12px;color:#C07A3E;">03</span>
+              <span style="font-family:'Space Mono',monospace;font-size:12px;color:#90876f;">desde $350</span>
+            </div>
+            <h3 style="font-family:'DM Serif Display',serif;font-size:27px;line-height:1.05;margin:0;font-weight:400;color:#1F1B16;">Páginas web</h3>
+            <p style="font-size:14px;line-height:1.55;margin:0;color:#5b5346;">Sitios rápidos y claros, construidos para guiar a una acción concreta.</p>
+            <span class="arrow-link" style="margin-top:auto;font-size:13.5px;color:#C07A3E;">Ver detalle →</span>
+          </a>
+
+          <a href="/servicios/forecasting.html" data-reveal class="scard" style="text-decoration:none;color:inherit;background:#C07A3E;border:1px solid #C07A3E;padding:30px 28px;display:flex;flex-direction:column;gap:14px;min-height:218px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <span style="font-family:'Space Mono',monospace;font-size:12px;color:#1C2A20;">04</span>
+              <span style="font-family:'Space Mono',monospace;font-size:12px;color:#5a3c25;">desde $700</span>
+            </div>
+            <h3 style="font-family:'DM Serif Display',serif;font-size:27px;line-height:1.05;margin:0;font-weight:400;color:#1C2A20;">Forecasting</h3>
+            <p style="font-size:14px;line-height:1.55;margin:0;color:#5a3c25;">Modelos de pronóstico de demanda, ventas y riesgo sobre tus datos históricos.</p>
+            <span class="arrow-link" style="margin-top:auto;font-size:13.5px;color:#1C2A20;">Ver detalle →</span>
+          </a>
+
         </div>
+      </section>
 
-        <div class="service-row reveal">
-          <div class="service-num">04</div>
-          <div class="service-name">Forecasting<span class="sub">decisiones con datos, no con corazonadas</span></div>
-          <div class="service-desc">Modelos de pronóstico de demanda, ventas o riesgo construidos sobre tus propios datos históricos, con base estadística sólida y resultados interpretables.</div>
-          <button class="service-arrow" onclick="sendPrompt('Quiero más detalles sobre el servicio de forecasting de ContraChaos')">↗</button>
+      <!-- PROCESO -->
+      <section style="max-width:1120px;margin:0 auto;padding:64px 32px 84px;">
+        <div data-reveal class="section-tag">Cómo trabajamos</div>
+        <h2 data-reveal style="font-size:clamp(30px,4vw,42px);margin:0 0 44px;max-width:560px;">Un proceso corto, sin sorpresas</h2>
+        <div class="process-grid">
+          <div data-reveal class="process-step">
+            <span style="font-family:'Space Mono',monospace;font-size:12px;color:#C07A3E;">01</span>
+            <h4 style="font-family:'DM Serif Display',serif;font-size:24px;margin:0;font-weight:400;">Escuchar</h4>
+            <p style="font-size:13.5px;line-height:1.55;color:#5b5346;margin:0;">Entendemos tu operación y dónde se va el tiempo del equipo.</p>
+          </div>
+          <div data-reveal class="process-step">
+            <span style="font-family:'Space Mono',monospace;font-size:12px;color:#C07A3E;">02</span>
+            <h4 style="font-family:'DM Serif Display',serif;font-size:24px;margin:0;font-weight:400;">Mapear</h4>
+            <p style="font-size:13.5px;line-height:1.55;color:#5b5346;margin:0;">Diseñamos el sistema antes de escribir una sola línea de código.</p>
+          </div>
+          <div data-reveal class="process-step">
+            <span style="font-family:'Space Mono',monospace;font-size:12px;color:#C07A3E;">03</span>
+            <h4 style="font-family:'DM Serif Display',serif;font-size:24px;margin:0;font-weight:400;">Construir</h4>
+            <p style="font-size:13.5px;line-height:1.55;color:#5b5346;margin:0;">Implementamos por partes, con entregas que ya empiezas a usar.</p>
+          </div>
+          <div data-reveal class="process-step">
+            <span style="font-family:'Space Mono',monospace;font-size:12px;color:#C07A3E;">04</span>
+            <h4 style="font-family:'DM Serif Display',serif;font-size:24px;margin:0;font-weight:400;">Acompañar</h4>
+            <p style="font-size:13.5px;line-height:1.55;color:#5b5346;margin:0;">Medimos, ajustamos y damos soporte a lo que construimos.</p>
+          </div>
         </div>
+      </section>
 
+      <!-- CTA BAND -->
+      <section class="cta-band">
+        <div class="container cta-band-inner">
+          <h2 data-reveal style="font-size:clamp(30px,4.4vw,46px);line-height:1.02;max-width:600px;">¿Qué proceso de tu operación deberías dejar de hacer a mano?</h2>
+          <a href="/contacto/" class="btn btn-dark-lg">Hablemos de eso →</a>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-grid">
+        <div>
+          <div class="logo footer-logo">
+            <span class="logo-name">ContraChaos</span>
+            <span class="logo-tag">Solutions</span>
+          </div>
+          <p class="footer-desc">Del caos operativo a sistemas que trabajan solos. Consultoría tecnológica desde Bolivia para toda LATAM.</p>
+        </div>
+        <div>
+          <div class="footer-col-head">Navegación</div>
+          <div class="footer-nav">
+            <a href="/" class="footer-link">Inicio</a>
+            <a href="/servicios/" class="footer-link">Servicios</a>
+            <a href="/contacto/" class="footer-link">Contacto</a>
+          </div>
+        </div>
+        <div>
+          <div class="footer-col-head">Contacto</div>
+          <div class="footer-nav">
+            <a href="https://wa.me/59168050981" class="footer-link">WhatsApp · +591 68050981</a>
+            <a href="mailto:contacto@contrachaos.net" class="footer-link">contacto@contrachaos.net</a>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2026 ContraChaos Solutions</span>
+        <span>contrachaos.net</span>
       </div>
     </div>
-  </div>
-</section>
+  </footer>
 
-<section id="proceso" class="process">
-  <div class="wrap">
-    <div class="section-head reveal">
-      <div>
-        <div class="section-tag">Cómo trabajamos</div>
-        <h2 class="section-title">Un proceso pensado para que nada se pierda en el camino</h2>
-      </div>
-      <p class="section-note">Cuatro etapas, sin saltos. Cada una termina en un entregable concreto, no en una promesa.</p>
-    </div>
-
-    <div class="process-grid reveal">
-      <div class="pstep">
-        <div class="pnum">01</div>
-        <div><div class="ptitle">Diagnóstico</div><div class="ptext">Entendemos el proceso real, no el que está documentado. Identificamos dónde se pierde tiempo y dónde se pierde dinero.</div></div>
-      </div>
-      <div class="pstep">
-        <div class="pnum">02</div>
-        <div><div class="ptitle">Diseño del sistema</div><div class="ptext">Definimos la arquitectura técnica más simple que resuelve el problema —sin sobreingeniería.</div></div>
-      </div>
-      <div class="pstep">
-        <div class="pnum">03</div>
-        <div><div class="ptitle">Construcción</div><div class="ptext">Desarrollo iterativo con entregas parciales. Ves avances reales cada semana, no al final del proyecto.</div></div>
-      </div>
-      <div class="pstep">
-        <div class="pnum">04</div>
-        <div><div class="ptitle">Estabilización</div><div class="ptext">Acompañamiento posterior al lanzamiento para ajustar el sistema a cómo realmente se usa en el día a día.</div></div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section id="resultados" class="proof">
-  <div class="wrap">
-    <div class="section-head reveal">
-      <div>
-        <div class="section-tag">Resultados</div>
-        <h2 class="section-title">Sistemas que ya están corriendo</h2>
-      </div>
-    </div>
-
-    <div class="proof-grid reveal">
-      <div class="proof-card">
-        <div class="proof-stat">100%</div>
-        <div class="proof-label">de producción de video automatizada en un flujo de contenido recurrente, sin intervención manual diaria.</div>
-      </div>
-      <div class="proof-card">
-        <div class="proof-stat">16+</div>
-        <div class="proof-label">usuarios gestionando asistencia y pagos mensuales desde un solo sistema, reemplazando planillas dispersas.</div>
-      </div>
-      <div class="proof-card">
-        <div class="proof-stat">80</div>
-        <div class="proof-label">eventos proyectados simultáneamente en un modelo de pronóstico con distribución estadística por resultado.</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section id="contacto">
-  <div class="wrap">
-    <div class="contact-box reveal">
-      <div class="contact-left">
-        <h2>Empecemos por el proceso que más te está costando.</h2>
-        <p>Una llamada de 5 minutos para entender tu caso y decirte, con honestidad, si podemos ayudarte y cómo.</p>
-        <a href="https://wa.me/59168050981" target="_blank" rel="noopener" class="contact-channel" style="text-decoration:none; cursor:pointer; transition:color .15s;" onmouseover="this.style.color='var(--ink)'" onmouseout="this.style.color='var(--ink-soft)'"><b>WhatsApp</b>&nbsp;— +591 68050981</a>
-        <div class="contact-channel"><b>Email</b>&nbsp;— contacto@contrachaos.net</div>
-        <div class="contact-channel"><b>Respuesta</b>&nbsp;— en menos de 24 horas hábiles</div>
-      </div>
-      <form id="contactForm">
-        <input type="hidden" name="access_key" value="73c7b378-d5a3-476c-9cb5-faffe801a14d">
-        <input type="hidden" name="subject" value="Nuevo contacto desde contrachaos.net">
-        <input type="hidden" name="from_name" value="ContraChaos Solutions — Formulario web">
-        <div class="field">
-          <label>Nombre</label>
-          <input type="text" name="name" placeholder="Tu nombre" required>
-        </div>
-        <div class="field">
-          <label>Email</label>
-          <input type="email" name="email" placeholder="tu@empresa.com" required>
-        </div>
-        <div class="field">
-          <label>Servicio de interés</label>
-          <select name="servicio">
-            <option>Automatización de workflows</option>
-            <option>Desarrollo de apps</option>
-            <option>Páginas web</option>
-            <option>Forecasting</option>
-            <option>No estoy seguro todavía</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>Contanos tu caso</label>
-          <textarea name="message" placeholder="¿Qué proceso te está costando más tiempo o dinero hoy?"></textarea>
-        </div>
-        <div class="submit-row">
-          <button class="btn-primary" type="submit" id="submitBtn">Enviar</button>
-          <span class="submit-note" id="formMsg" style="display:none;">Mensaje enviado — te responderemos pronto.</span>
-          <span class="submit-note" id="formErr" style="display:none; color:var(--warn);">Hubo un problema al enviar. Probá de nuevo o escribinos directo por email.</span>
-        </div>
-      </form>
-    </div>
-  </div>
-</section>
-
-<footer>
-  <div class="wrap">
-    <span class="fmark">ContraChaos Solutions © 2026</span>
-    <span class="fmark">La Paz, Bolivia — trabajo remoto disponible</span>
-  </div>
-</footer>
-
-<script>
-  // chaos -> order dot visualization on the flow strip
-  (function(){
-    const chaos = document.getElementById('chaosDots');
-    const order = document.getElementById('orderDots');
-    const chaosPositions = [[14,12],[26,38],[10,30],[34,18],[20,8],[30,44]];
-    const orderPositions = [[526,27],[538,27],[514,27],[550,27],[502,27],[546,27]];
-    chaosPositions.forEach(([x,y])=>{
-      const c = document.createElementNS('http://www.w3.org/2000/svg','circle');
-      c.setAttribute('cx',x); c.setAttribute('cy',y); c.setAttribute('r',2.6);
-      c.setAttribute('fill','#4F7C8C'); c.setAttribute('opacity','0.75');
-      chaos.appendChild(c);
-    });
-    orderPositions.forEach(([x,y])=>{
-      const c = document.createElementNS('http://www.w3.org/2000/svg','circle');
-      c.setAttribute('cx',x); c.setAttribute('cy',y); c.setAttribute('r',2.6);
-      c.setAttribute('fill','#C9893F');
-      order.appendChild(c);
-    });
-  })();
-
-  // scroll reveal
-  const reveals = document.querySelectorAll('.reveal');
-  const io = new IntersectionObserver((entries)=>{
-    entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
-  }, {threshold:0.15});
-  reveals.forEach(el=>io.observe(el));
-
-  // contact form -> Web3Forms
-  const contactForm = document.getElementById('contactForm');
-  if(contactForm){
-    contactForm.addEventListener('submit', async function(e){
-      e.preventDefault();
-      const btn = document.getElementById('submitBtn');
-      const msg = document.getElementById('formMsg');
-      const err = document.getElementById('formErr');
-      msg.style.display = 'none';
-      err.style.display = 'none';
-      btn.disabled = true;
-      btn.textContent = 'Enviando...';
-      try{
-        const formData = new FormData(contactForm);
-        const res = await fetch('https://api.web3forms.com/submit', {
-          method: 'POST',
-          headers: { 'Accept': 'application/json' },
-          body: formData
-        });
-        const result = await res.json();
-        if(result.success){
-          msg.style.display = 'inline';
-          contactForm.reset();
-        } else {
-          err.style.display = 'inline';
-        }
-      } catch(error){
-        err.style.display = 'inline';
-      } finally {
-        btn.disabled = false;
-        btn.textContent = 'Enviar';
-      }
-    });
-  }
-</script>
-
+</div>
+<script src="/js/main.js"></script>
 </body>
 </html>
