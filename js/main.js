@@ -1,3 +1,24 @@
+/* === HAMBURGER MENU === */
+(function () {
+  var btn = document.getElementById('nav-hamburger');
+  var panel = document.getElementById('nav-mobile-panel');
+  if (!btn || !panel) return;
+
+  btn.addEventListener('click', function () {
+    var open = panel.classList.toggle('open');
+    btn.classList.toggle('open', open);
+    btn.setAttribute('aria-expanded', open);
+  });
+
+  // Cierra el panel al hacer clic en un link
+  panel.querySelectorAll('a').forEach(function (link) {
+    link.addEventListener('click', function () {
+      panel.classList.remove('open');
+      btn.classList.remove('open');
+    });
+  });
+})();
+
 /* === ACTIVE NAV === */
 (function () {
   var path = window.location.pathname;
