@@ -31,9 +31,14 @@ main { flex: 1; overflow-x: hidden; }
   display: flex; align-items: center; justify-content: space-between;
   padding-top: 18px; padding-bottom: 18px;
 }
-.logo { display: flex; align-items: center; flex-shrink: 0; min-width: 0; }
-.logo-img { display: block; height: 38px; max-height: 38px; width: auto; max-width: 180px; object-fit: contain; }
-.logo-img-footer { display: block; height: 36px; max-height: 36px; width: auto; max-width: 200px; object-fit: contain; }
+.logo { display: flex; align-items: center; flex-shrink: 0; min-width: 0; gap: 10px; }
+.logo-img { display: block; height: 38px; max-height: 38px; width: auto; max-width: 180px; object-fit: contain; flex-shrink: 0; }
+.logo-img-footer { display: block; height: 34px; max-height: 34px; width: auto; max-width: 180px; object-fit: contain; flex-shrink: 0; }
+.logo-wordmark { display: flex; flex-direction: column; gap: 3px; line-height: 1; }
+.logo-name { font-family: 'DM Serif Display', serif; font-size: 16px; color: #1F1B16; letter-spacing: -.01em; white-space: nowrap; }
+.logo-sub { font-family: 'Space Mono', monospace; font-size: 7px; letter-spacing: .22em; text-transform: uppercase; color: #C07A3E; white-space: nowrap; }
+.footer-logo { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+.footer-logo .logo-name { color: #EDE3D0; font-size: 15px; }
 .nav-links { display: flex; gap: 30px; align-items: center; }
 .nav-item { font-size: 14px; color: #5b5346; }
 .nav-item:hover, .nav-item.active { color: #C07A3E; }
@@ -229,7 +234,11 @@ main { flex: 1; overflow-x: hidden; }
   .cta-band-inner { flex-direction: column; }
   .nav-links { display: none !important; }
   .nav-hamburger { display: flex !important; }
-  .logo-img { height: 32px; max-height: 32px; }
+  .logo-img { height: 28px; max-height: 28px; }
+  .logo-img-footer { height: 28px; max-height: 28px; }
+  .logo-name { font-size: 14px; }
+  .logo-sub { font-size: 6.5px; letter-spacing: .18em; }
+  .logo { gap: 8px; }
   .contact-grid { grid-template-columns: 1fr; }
   .service-body-grid { grid-template-columns: 1fr; }
   .next-service-link { flex-direction: column; align-items: flex-start; gap: 12px; }
